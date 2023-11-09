@@ -1,0 +1,433 @@
+
+<!DOCTYPE html>
+<html lang="br">
+
+<head>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Promotorias MP-GO</title>
+    <meta name="author" content="dms">
+    <meta content="Listagem das Promotorias do MP-GO">
+    <link rel="SHORTCUT ICON" href="https://www.mpgo.mp.br/portal/arquivos/2023/05/17/14_16_09_931_app_prom.ico">
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" 
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" 
+        integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
+        crossorigin="anonymous">
+    <link rel="stylesheet"
+        href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet"
+        type="text/css" 
+        href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+</head>
+
+<body>
+    <span id="mpLogo">
+    <table>
+        <TD><IMG src="https://www.mpgo.mp.br/portal/arquivos/2013/05/27/15_42_25_59_Logo_MPGO_01.jpg" width="100px"></TD>
+        <TD><div>
+            <h1>Promotorias MP-GO</h1>
+            <p>Lista de Promotorias do Ministério Público do Estado de Goiás</p>
+        </div></TD>
+    </table> 
+    </span>
+    <div class="container-fluid">
+        <main class="row">
+            <div class="col">
+                <div id="table-container"></div>
+            </div>
+        </main>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.2.1/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.21/jquery.csv.min.js" 
+        integrity="sha512-Y8iWYJDo6HiTo5xtml1g4QqHtl/PO1w+dmUpQfQSOTqKNsMhExfyPN2ncNAe9JuJUSKzwK/b6oaNPop4MXzkwg==" 
+        crossorigin="anonymous" 
+        referrerpolicy="no-referrer">
+    </script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
+
+
+    <!-- 
+    <script src="https://www.mpgo.mp.br/portal/arquivos/2023/05/22/17_17_34_852_csv2table_novo.js"></script>
+     -->
+
+
+    <script src="csv2table3.js"></script>
+
+    <script>
+        // https://github.com/derekeder/csv-to-html-table
+        // python3 -m http.server 8000
+
+		let eLocal = (location.href.search('file:/')==0);
+        let e127 = (location.href.search('http://127')==0);
+        let bl_mostra = true;
+        let mostra_add = (bl_mostra) ? ' hidden':'';
+        var table;
+        var dtTable;
+        var csvData;
+        var csvOriginal;
+        var valTable=[];
+        var mapaCampos;
+        var objCampos;
+        var arrayCampos=[];
+        var tbOriginal=[];
+        var gUltimaLinhaTR=null;
+        var gScrollY=600;
+
+        if (ehIframe) {
+            gScrollY=450;
+        };
+
+        var csv_path = "app-prom2.txt";
+        if (!e127) {
+            csv_path = "https://www.mpgo.mp.br/portal/arquivos/2023/05/22/17_18_44_42_app_prom2.txt";
+        };
+        //teste
+        csv_path = "https://desdmdzbrbkdqqqfezau.supabase.co/storage/v1/object/public/teste-pub/app-prom2.txt";
+        csv_path = csv_path.concat('?r=', Math.floor(Math.random()*100000));
+
+        $(document).ready(function () {
+            console.log('ready');
+
+            inicia();
+
+        });
+
+
+        // coloca label nas variaveis do array
+        function colocaLabel(csvData) {
+            mapaCampos = cria_mapa(csvData);
+            objCampos = Object.fromEntries(mapaCampos)
+            var novo = new Array();
+            // csvData.forEach(function (value, index, Array) {  - era csvData
+            tbOriginal.forEach(function (value, index, Array) {
+                var mini_campo = [];
+                value.forEach (function (value1, index1, Array1) {
+                    var label = mapaCampos.get(index1);
+                    label = label.replaceAll(' ', '_').replaceAll('-','').replaceAll('.','');
+                    mini_campo[label] = value1;
+                });
+                novo.push(mini_campo); 
+            });
+            return novo;
+        };
+
+        // adiciona evento click
+        function addClick() {
+            mapaCampos = cria_mapa(valTable);
+            objCampos = Object.fromEntries(mapaCampos)
+            var novo = new Array();
+            valTable.forEach(function (value, index, Array) {
+                var mini_campo = [];
+                value.forEach (function (value1, index1, Array1) {
+                    var label = mapaCampos.get(index1);
+                    label = label.replaceAll(' ', '_').replaceAll('-','').replaceAll('.','');
+                    mini_campo[label] = value1;
+                });
+                novo.push(mini_campo); 
+            });
+            arrayCampos = novo;
+            tbOriginal = colocaLabel(tbOriginal);
+
+            $('#table-container tbody').on('click', 'td.dt-control', function () {
+                var tr = $(this).closest('tr');
+                var row = dtTable.row(tr);
+                var pos = 0;
+                if (row.child.isShown()) {
+                    // This row is already open - close it
+                    row.child.hide();
+                    tr.removeClass('shown');
+                    tr.removeClass('dt-hasChild');
+                } else {
+                    // Open this row
+                    //row.child(format(row.data())).show();
+                    //row.child(format(arrayCampos[row.data()[0]])).show();
+                    //pos = tbOriginal.findIndex(item => item.id === row.data()[0]);
+                    pos = tbOriginal.findIndex(item => item.id === row[0][0].toString());
+                    pos=row[0][0]+1; // quando tem outras info
+                    row.child(formatExtraInfo(tbOriginal[pos])).show(); // teste para acertar a linha
+                    tr.addClass('shown');
+                    tr.addClass('dt-hasChild');
+                    // verifica se tem outra linha aberta
+                    if (gUltimaLinhaTR != null) {
+                        var gUltimaLinhaRow = dtTable.row(gUltimaLinhaTR);
+                        if (gUltimaLinhaRow.child.isShown()) {
+                            // se aberta, fecha
+                            gUltimaLinhaRow.child.hide()
+                            gUltimaLinhaTR.removeClass('shown');
+                            gUltimaLinhaTR.removeClass('dt-hasChild');
+                            gUltimaLinhaTR=null;
+                        }
+                    }
+                    gUltimaLinhaTR=tr;
+                }
+            });
+            // outras funções para executar
+            changeHTML('#table-container-table_filter label', [['Search', 'Pesquisar'], ['Search', 'Pesquisar']]);
+            changeHTML('#table-container-table_length label', [['entries', 'itens']]);
+            changeHTML('#table-container-table_info', [
+                ['Showing', 'Mostrando'],
+                [' of', '. Total de '],
+                ['entries', 'itens'], 
+                ['to', 'de']
+            ]);
+        };
+
+        // prepara o mapa
+        function cria_mapa(obj) {
+            var mp = new Map([]);
+            for (var i = 0; i < obj[0].length; i++) {
+                mp.set(i, obj[0][i]);
+            }
+            return (mp);
+        };
+
+        // troca o texto em um selector sem alterar o restante
+        function changeHTML(selector, replacements) {
+           var html = $(selector).html();
+           if (html) {
+             replacements.forEach(function(tuple) {
+                var originalText = tuple[0];
+                var newText = tuple[1];
+                html = html.replace(originalText, newText);
+             });
+             $(selector).html(html);
+           }
+        }
+
+        function inicia() {
+            console.log('inicia');
+           
+
+            var ret_nda = init({
+                csv_path: csv_path,
+                element: "table-container",
+                allow_download: false,
+                csv_options: {
+                    separator: "\t",
+                    delimiter: '"'
+                },
+                deferRender: true, // teste Scroller
+                scrollY: 50, // Height of the viewport - não funcionou
+                scroller: true,
+                datatables_options: {
+                    autoWidth: true,
+                    paging: false,
+                    pageLength: 100, // tamanho da página
+                    scrollY: gScrollY, // 600,
+                    scrollX: true,
+                    order: [[1, 'asc']],    
+                    columnDefs: [
+                        {
+                        title: '',
+                        targets: 0,
+                        searchable: false,
+                        orderable: false,
+                        visible: true,
+                        className: 'dt-control'
+                        },
+                        { //  'Comarca',
+                        targets: 1,
+                        searchable: true,
+                        visible: true,
+                        },
+                        { //  'Promotoria de Justiça',
+                        targets: 2,
+                        searchable: true,
+                        visible: true,
+                        },
+                        { //  'endereço',
+                        targets: 3,
+                        searchable: true,
+                        visible: false,
+                        },
+                        { //  'Sala',
+                        targets: 4,
+                        searchable: false,
+                        visible: false,
+                        },
+                        { //  'Titular',
+                        targets: 5,
+                        searchable: true,
+                        visible: true,
+                        },
+                        { //  'telefones',
+                        targets: 6,
+                        searchable: false,
+                        orderable: false,
+                        visible: true,
+                        }
+                        ,
+                        { //  'e-mail',
+                        targets: 7,
+                        searchable: false,
+                        orderable: false,
+                        visible: true,
+                        },
+                        { //  'atribuição',
+                        targets: 8,
+                        searchable: false,
+                        visible: false,
+                        },
+                        { //  'situação',
+                        targets: 9,
+                        searchable: false,
+                        visible: true,
+                        }
+                    ]
+                },
+                custom_formatting: [
+                  //[15, formata_link2], [6, formataEmail]
+                  [0, formataId],[7, formataEmail]
+                ]
+            });
+            if (ehIframe()) {
+                // apaga o logo
+                $('#mpLogo').html('');
+            }
+            console.log('inicia fim');
+        };
+
+    /*
+        cellTemplateFunc(dados = csvData[rowIdx][colIdx],
+        rowIdx = rowIdx, colIdx=colIdx));
+    */
+
+    function formataEmail(dados) { // era link
+        return formataTipo(dados, 'email');
+    };
+
+    function formataId(dados) { // era link
+        var ret = '';
+        //ret = '<font size=0>' + dados + '</font>';
+        return ret;
+    };
+
+    function formata_link(dados) {
+        var link = dados;
+        if (link)
+            return 
+        else return "";
+    };
+
+    function formata_link2(dados, rowIdx, colIdx) { // era link
+        if (typeof(arrayCampos)=='undefined' || arrayCampos.length==0) {
+            arrayCampos = colocaLabel(csvData);
+            tbOriginal = colocaLabel(tbOriginal);
+        };
+        var ret = '';
+        var url = dados;
+        var extra = '';
+        //console.log('formata link2: ', mapaCampos.get(colIdx));
+        if (mapaCampos.get(colIdx)=='Resolução' && dados!='') {
+            url = arrayCampos[rowIdx].url_resolucao;
+            extra = dados;
+        };
+        ret = formataTipo(url, 'link', extra=extra);
+        return ret;
+    };
+
+    // adiciona evento para abrir e fechar os detalhes
+    function addEventListener() {
+
+    };
+
+    // formata uma linha comum
+    function formataLinha(label, campo, mostrarVazio = false) {
+        var ret = '';
+        var mostrar = true;
+        if (campo == undefined) {
+            campo = '';
+            console.warn('Campo: ', label, ' indefinido');
+        }
+        if (campo == '.' || campo == '-') campo = '';
+        mostrar = (campo.length>0);
+        if (mostrarVazio) mostrar = true;
+        if (mostrar) {
+            ret = '<tr><td>xxLabel:</td><td>xxCampo</td></tr>';
+            ret = ret.replace('xxLabel', label);
+         ret = ret.replace('xxCampo', campo);
+        };
+        return ret;
+    };
+
+    function formataTipo(texto, tipo, extra='') {
+        var ret = '';
+        var tipoLink = '<a href="xURL" xTarget>xADD</a>';
+        var url = '';
+        var xTarget = '';
+        add = extra;
+        if (texto.length<=2) return '';
+        if (tipo=='email') {
+            url = 'mailto:'.concat(texto);
+            xTarget='';
+        };
+        if (tipo=='link') {
+            url = texto;
+            xTarget = ' target="_blank" ';
+            tipoLink = tipoLink.replaceAll('xTarget', xTarget);
+        };
+        if (add=='') add = texto;
+        ret = tipoLink.replace('xURL',url);
+        ret = ret.replace('xADD', add);
+        return ret;
+    }
+
+    function formatExtraInfo(d) {
+        // `d` is the original data object for the row
+        var ret = '';
+        ret = (
+            '<table cellpadding="8" cellspacing="0" border="1" style="padding-left:50px">' +
+            formataLinha('Titular', d.Titular) +
+            formataLinha('Responsável Atual', d.Responsável_Atual) +
+            formataLinha('Matrícula do Responsável Atual', d.ResponsavelAtualMat) +
+            formataLinha('Resolução', formataTipo(d.url_resolucao, 'link', extra=d.Resolução)) +
+            formataLinha('E-mail', 
+                formataTipo(d.email, 'email')
+            ) +
+            formataLinha('Telefones', d.celulares) +
+            formataLinha('Motivo Afastamento Titular', d.Motivo_Afastamento_Titular_DG) +
+            formataLinha('Endereço', d.Endereço) +
+            formataLinha('Sala', d.Sala) +
+            formataLinha('Comarca', d.Comarca) +
+            formataLinha('Mapa', strMapa(d.Endereço, d.Comarca)) +
+            formataLinha('Situação', d.Situação) +
+            formataLinha('Atribuições', d.Atribuição) +
+            formataLinha('Coord_PJs', d.Coord_PJs) +
+            formataLinha('Entrancia', d.Entrância) +
+            formataLinha('Criado em', d.created_at) +
+            formataLinha('Editado por', d.editado) +
+            formataLinha('Editado em', d.editado_em) +
+            '</table>'
+        );
+        return ret;
+    };
+
+
+    function strMapa(endereco, comarca) {
+        var iframe = '';
+        var local = endereco;
+        if (local.length<=2) local = comarca + ', Goias, Brasil'; 
+        if (endereco.length>0) {
+            iframe = '<iframe width="100%" height="300" id="gmap_canvas" src="https://maps.google.com/maps?q=xAddr&t=&z=10&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>';
+            iframe = iframe.replace('xAddr', local);
+        };
+        return (iframe);
+    };
+    
+    function ehIframe() {
+        return (window.top !== window.self);
+    };
+
+    </script>
+</body>
+
+</html>

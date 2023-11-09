@@ -1,0 +1,117 @@
+/**
+ * = PRINT styles
+ *
+ * - Imported in global.css (http://www.phpied.com/delay-loading-your-print-css/)
+ * - Taken straight from: https://github.com/h5bp/html5-boilerplate/blob/master/src/css/main.css#L197
+ *
+ * @TODO:
+ * - Add to this?
+ *
+ * ========================================================================= */
+
+/* stylelint-disable declaration-no-important  */
+
+
+@media print { 
+	*,
+	*:before,
+	*:after,
+	*:first-letter,
+	p:first-line,
+	div:first-line,
+	blockquote:first-line,
+	li:first-line {
+		background: transparent !important;
+		color: #000 !important; /* Black prints faster:
+								   http://www.sanbeiji.com/archives/953 */
+		box-shadow: none !important;
+		text-shadow: none !important;
+	}
+
+	* {
+		font-family: "Open Sans", sans-serif !important;
+	}
+
+	a,
+	a:visited { text-decoration: underline; }
+
+	/* esse cara oculta os links, tem que ajustar pra não exibir link associado a uma imagem apenas. 
+	* a[href]:after { content: " (" attr(href) ")"; }
+	*/
+	
+	abbr[title]:after { content: " (" attr(title) ")"; }
+
+	/*
+	 * Don't show links that are fragment identifiers,
+	 * or use the `javascript:` pseudo protocol
+	 */
+
+	a[href^="#"]:after,
+	a[href^="javascript:"]:after { content: ""; }
+
+	pre { white-space: pre-wrap !important; }
+
+	pre,
+	blockquote {
+		border: 1px solid #999;
+		page-break-inside: avoid;
+	}
+
+	/*
+	 * Printing Tables:
+	 * http://css-discuss.incutio.com/wiki/Printing_Tables
+	 */
+
+	thead { display: table-header-group; }
+
+	tr,
+	img { page-break-inside: avoid; }
+
+	p,
+	h2,
+	h3 {
+		orphans: 3;
+		widows: 3;
+	}
+
+	h2,
+	h3 { page-break-after: avoid; }
+
+	/**
+	 * HIDE certain elements completely
+	 */
+	.hidden, .print-hidden {
+		display: none;
+	}
+
+	.figure_noticia_home img {
+		width: 50%  !important;
+		height: 50%  !important;
+	}
+
+	#top, #header-interno, #header-interno-items, #migalhas, #mapa, #div-noticias-relacionadas, #redes-sociais, .js-cookies-eu { 
+		display: none;
+	}
+
+	aside.col-3.col-m-3.col-xm-3.pr-30.max-s,
+	section.section-md.bg-base-2 {
+		display: none;
+	}
+
+	.access-button{display:none !important}
+
+
+	/* normas */
+	.acts-normas-logo, .acts-normas-title{
+		text-align: center;
+	}
+	.acts-normas-conteudo{
+		text-align: justify;
+	}
+	.acts-normas-ementa{
+		padding-left: 50%;
+		text-align: justify;
+	}
+}
+
+/* stylelint-enable */
