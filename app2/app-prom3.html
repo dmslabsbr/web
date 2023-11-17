@@ -86,12 +86,12 @@
             gScrollY=450;
         };
 
-        var csv_path = "app-prom2.txt";
+        var csv_path = "app-prom3.txt";
         if (!e127) {
             csv_path = "https://www.mpgo.mp.br/portal/arquivos/2023/05/22/17_18_44_42_app_prom2.txt";
         };
         //teste
-        csv_path = "https://desdmdzbrbkdqqqfezau.supabase.co/storage/v1/object/public/teste-pub/app-prom2.txt";
+        csv_path = "https://desdmdzbrbkdqqqfezau.supabase.co/storage/v1/object/public/teste-pub/app-prom3.txt";
         csv_path = csv_path.concat('?r=', Math.floor(Math.random()*100000));
 
         $(document).ready(function () {
@@ -219,7 +219,7 @@
                 scrollY: 50, // Height of the viewport - não funcionou
                 scroller: true,
                 datatables_options: {
-                    autoWidth: true,
+                    autoWidth: false,
                     paging: false,
                     pageLength: 100, // tamanho da página
                     scrollY: gScrollY, // 600,
@@ -385,10 +385,10 @@
         // `d` is the original data object for the row
         var ret = '';
         ret = (
-            '<table cellpadding="8" cellspacing="0" border="1" style="padding-left:50px">' +
+            '<table cellpadding="8" cellspacing="0" border="1" width="90%" style="padding-left:50px">' +
             formataLinha('Titular', d.Titular) +
             formataLinha('Responsável Atual', d.Responsável_Atual) +
-            formataLinha('Matrícula do Responsável Atual', d.ResponsavelAtualMat) +
+            //formataLinha('Matrícula do Responsável Atual', d.ResponsavelAtualMat) +
             formataLinha('Resolução', formataTipo(d.url_resolucao, 'link', extra=d.Resolução)) +
             formataLinha('E-mail', 
                 formataTipo(d.email, 'email')
@@ -402,10 +402,10 @@
             formataLinha('Situação', d.Situação) +
             formataLinha('Atribuições', d.Atribuição) +
             formataLinha('Coord_PJs', d.Coord_PJs) +
-            formataLinha('Entrancia', d.Entrância) +
-            formataLinha('Criado em', d.created_at) +
+            formataLinha('Entrância', d.Entrância) +
+            //formataLinha('Criado em', d.created_at) +
             formataLinha('Editado por', d.editado) +
-            formataLinha('Editado em', d.editado_em) +
+            //formataLinha('Editado em', d.editado_em) +
             '</table>'
         );
         return ret;
